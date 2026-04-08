@@ -21,3 +21,10 @@ var resourceNunitoRegularTtf = &fyne.StaticResource{
 	StaticName:    "assets/fonts/Nunito-Regular.ttf",
 	StaticContent: resourceNunitoRegularTtfData,
 }
+
+//go:embed assets/images/kitten_greet.png
+var resourceKittengreetPngData []byte
+var resourceKittengreetPng = &fyne.StaticResource{
+	StaticName:    "assets/images/kitten_greet.png",
+	StaticContent: resourceKittengreetPngData,
+}

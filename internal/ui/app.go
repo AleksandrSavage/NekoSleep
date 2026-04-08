@@ -12,11 +12,11 @@ type App struct {
 }
 
 // NewApp — конструктор нашего приложения
-func NewApp(font fyne.Resource, icon fyne.Resource) *App {
+func NewApp(font fyne.Resource, icon fyne.Resource, kitten_greet fyne.Resource) *App {
 	// 1. Создаем базовое приложение Fyne
 	a := app.New()
 
-	// 2. Устанавливаем кастомную тему (функция NewCustomTheme лежит в твоем theme.go)
+	// 2. Устанавливаем кастомную тему (функция NewCustomTheme лежит в theme.go)
 	a.Settings().SetTheme(NewCustomTheme(font, icon))
 
 	// 3. Создаем главное окно
@@ -24,7 +24,7 @@ func NewApp(font fyne.Resource, icon fyne.Resource) *App {
 	w.Resize(fyne.NewSize(640, 400))
 
 	// 4. Получаем интерфейс из layout.go и вставляем его в окно
-	content := buildMainLayout()
+	content := buildMainLayout(kitten_greet)
 	w.SetContent(content)
 
 	return &App{
