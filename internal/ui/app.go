@@ -22,6 +22,7 @@ func NewApp(font fyne.Resource, icon fyne.Resource, kitten_greet fyne.Resource) 
 	// 3. Создаем главное окно
 	w := a.NewWindow("NekoSleep")
 	w.Resize(fyne.NewSize(640, 400))
+	w.SetFixedSize(true)
 
 	// 4. Получаем интерфейс из layout.go и вставляем его в окно
 	content := buildMainLayout(kitten_greet)

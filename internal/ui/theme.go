@@ -41,5 +41,11 @@ func (c *customTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
 }
 
 func (c *customTheme) Size(name fyne.ThemeSizeName) float32 {
+	if name == theme.SizeNameText {
+		return 20
+	}
+	if name == theme.SizeNameHeadingText {
+		return 60
+	}
 	return c.defaultTheme.Size(name)
 }
