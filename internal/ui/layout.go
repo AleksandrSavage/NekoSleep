@@ -7,115 +7,123 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/widget"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 
 	"NekoSleep/internal/config"
 )
 
 func buildMainLayout(kitten_greet fyne.Resource, w fyne.Window) fyne.CanvasObject {
 
-	// --- 1 ---
-	helloText := widget.NewRichTextFromMarkdown("# Good night")
-	
-	img := canvas.NewImageFromResource(kitten_greet)
-	img.FillMode = canvas.ImageFillContain
+	mainWrapper := container.NewMax()
 
-	img.SetMinSize(fyne.NewSize(80, 80)) 
-	
-	headerRow := container.NewCenter(container.NewHBox(helloText, img))
+	var makeEditScreen func() fyne.CanvasObject
+	var makeSavedScreen func(data *config.SleepData) fyne.CanvasObject
 
+	makeSavedScreen = func(data *config.SleepData) fyne.CanvasObject {
+		timeText := widget.NewLabel(fmt.Sprintf("Sleep time: %s:%s", data.Hour, data.Minute))
+		cyclesText := widget.NewLabel(fmt.Sprintf("Prolongation left: %s", data.Cycles))
 
-	// --- 2 ---
-	var hours, minutes []string
-	for i := 0; i < 24; i++ {
-		hours = append(hours, fmt.Sprintf("%02d", i))
+		timeText.Alignment = fyne.TextAlignCenter
+		cyclesText.Alignment = fyne.TextAlignCenter
+
+		denyBtn := widget.NewButtonWithIcon("deny", theme.CancelIcon(), func() {
+			config.Delete()
+			mainWrapper.Objects = []fyne.CanvasObject{makeEditScreen()}
+			mainWrapper.Refresh()
+		})
+
+		sizedDenyBtn := container.NewGridWrap(fyne.NewSize(160, 45), denyBtn)
+
+		content := container.NewVBox(
+			layout.NewSpacer(),
+			timeText,
+			cyclesText,
+			widget.NewLabel(""),
+			container.NewCenter(sizedDenyBtn),
+			layout.NewSpacer(),
+		)
+
+		return container.NewPadded(content)
 	}
-	for i := 0; i < 60; i++ {
-		minutes = append(minutes, fmt.Sprintf("%02d", i))
-	}
 
+	makeEditScreen = func() fyne.CanvasObject {
+		helloText := widget.NewRichTextFromMarkdown("# Good night")
+		img := canvas.NewImageFromResource(kitten_greet)
+		img.FillMode = canvas.ImageFillContain
+		img.SetMinSize(fyne.NewSize(80, 80))
+		headerRow := container.NewCenter(container.NewHBox(helloText, img))
 
-	// --- 3 ---
-	currentHour, currentMinute, currentCycle := "00", "00", "1"
-
-
-	// --- 4 ---
-	hourSelect := widget.NewSelect(hours, func(selected string) {
-		currentHour = selected
-	})
-	hourSelect.SetSelected("00")
-
-	minuteSelect := widget.NewSelect(minutes, func(selected string) {
-		currentMinute = selected
-	})
-	minuteSelect.SetSelected("00")
-
-	questionText := widget.NewLabel("when to sleep?")
-	timeSelectionRow := container.NewCenter(container.NewHBox(questionText, hourSelect, minuteSelect))
-
-
-	// --- 5 ---
-	calcButton := widget.NewButton("save", func() {
-		
-		data := &config.SleepData{
-			Hour:   currentHour,
-			Minute: currentMinute,
-			Cycles: currentCycle,
+		var hours, minutes []string
+		for i := 0; i < 24; i++ {
+			hours = append(hours, fmt.Sprintf("%02d", i))
+		}
+		for i := 0; i < 60; i++ {
+			minutes = append(minutes, fmt.Sprintf("%02d", i))
 		}
 
-		err := config.Save(data)
-		
-		if err != nil {
-			fmt.Println("❌ Ошибка сохранения:", err)
-		} else {
-			fmt.Println("✅ Настройки успешно сохранены в config.json!")
+		currentHour, currentMinute, currentCycle := "00", "00", "1"
+
+		hourSelect := widget.NewSelect(hours, func(selected string) { currentHour = selected })
+		hourSelect.SetSelected("00")
+
+		minuteSelect := widget.NewSelect(minutes, func(selected string) { currentMinute = selected })
+		minuteSelect.SetSelected("00")
+
+		questionText := widget.NewLabel("when to sleep?")
+		timeSelectionRow := container.NewCenter(container.NewHBox(questionText, hourSelect, minuteSelect))
+
+		calcButton := widget.NewButton("save", func() {
+			data := &config.SleepData{
+				Hour:   currentHour,
+				Minute: currentMinute,
+				Cycles: currentCycle,
+			}
+
+			err := config.Save(data)
+			if err == nil {
+				mainWrapper.Objects = []fyne.CanvasObject{makeSavedScreen(data)}
+				mainWrapper.Refresh()
+			} else {
+				fmt.Println("❌ Ошибка сохранения:", err)
+			}
+		})
+
+		sizedButton := container.NewGridWrap(fyne.NewSize(160, 45), calcButton)
+		buttonRow := container.NewCenter(sizedButton)
+
+		var cycleOptions []string
+		for i := 1; i <= 5; i++ {
+			cycleOptions = append(cycleOptions, fmt.Sprint(i))
 		}
-	})
 
-	sizedButton := container.NewGridWrap(fyne.NewSize(160, 45), calcButton)
-    buttonRow := container.NewCenter(sizedButton)
-	
+		cycleSelect := widget.NewSelect(cycleOptions, func(selected string) { currentCycle = selected })
+		cycleSelect.SetSelected("1")
 
-	// --- 6 ---
-	var cycleOptions []string
-	for i := 1; i <= 5; i++ {
-		cycleOptions = append(cycleOptions, fmt.Sprint(i))
+		smallSelectWrapper := container.NewGridWrap(fyne.NewSize(70, 35), cycleSelect)
+		infoIcon := newHoverIcon(theme.InfoIcon(), "How many times you can\n unlock your screen.", w.Canvas())
+		infoWrapper := container.NewGridWrap(fyne.NewSize(24, 24), infoIcon)
+		bottomRightRow := container.NewHBox(layout.NewSpacer(), infoWrapper, smallSelectWrapper)
+
+		content := container.NewVBox(
+			layout.NewSpacer(),
+			headerRow,
+			timeSelectionRow,
+			widget.NewLabel(""),
+			buttonRow,
+			layout.NewSpacer(),
+			bottomRightRow,
+		)
+
+		return container.NewPadded(content)
 	}
-	
-	cycleSelect := widget.NewSelect(cycleOptions, func(selected string) {
-		currentCycle = selected
-	})
-	cycleSelect.SetSelected("1") 
 
-	smallSelectWrapper := container.NewGridWrap(fyne.NewSize(70, 35), cycleSelect)
-	
-	infoIcon := newHoverIcon(
-        theme.InfoIcon(), 
-        "How many times you can\n unlock your screen.", 
-        w.Canvas(),
-    )
-    
-    infoWrapper := container.NewGridWrap(fyne.NewSize(24, 24), infoIcon)
+	data, err := config.Load()
+	if err == nil {
+		mainWrapper.Objects = []fyne.CanvasObject{makeSavedScreen(data)}
+	} else {
+		mainWrapper.Objects = []fyne.CanvasObject{makeEditScreen()}
+	}
 
-	bottomRightRow := container.NewHBox(layout.NewSpacer(),infoWrapper, smallSelectWrapper)
-
-
-	// --- 7 ---
-	content := container.NewVBox(
-		layout.NewSpacer(),      
-		
-		headerRow,               
-		timeSelectionRow,
-		
-		widget.NewLabel(""),
-		
-		buttonRow,
-		
-		layout.NewSpacer(),      
-		
-		bottomRightRow,          
-	)
-
-	return container.NewPadded(content)
+	return mainWrapper
 }

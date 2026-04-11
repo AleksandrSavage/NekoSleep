@@ -64,3 +64,13 @@ func Load() (*SleepData, error) {
 
 	return &data, nil
 }
+
+// Delete удаляет файл конфигурации
+func Delete() error {
+	dir, err := os.UserConfigDir()
+	if err != nil {
+		return err
+	}
+	path := filepath.Join(dir, "NekoSleep", "config.json")
+	return os.Remove(path)
+}
