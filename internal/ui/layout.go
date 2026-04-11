@@ -37,7 +37,6 @@ func buildMainLayout(kitten_greet fyne.Resource, w fyne.Window) fyne.CanvasObjec
 
 
 	// --- 3 ---
-
 	currentHour, currentMinute, currentCycle := "00", "00", "1"
 
 
@@ -73,8 +72,10 @@ func buildMainLayout(kitten_greet fyne.Resource, w fyne.Window) fyne.CanvasObjec
 			fmt.Println("✅ Настройки успешно сохранены в config.json!")
 		}
 	})
-	buttonRow := container.NewCenter(calcButton)
 
+	sizedButton := container.NewGridWrap(fyne.NewSize(160, 45), calcButton)
+    buttonRow := container.NewCenter(sizedButton)
+	
 
 	// --- 6 ---
 	var cycleOptions []string
@@ -105,7 +106,10 @@ func buildMainLayout(kitten_greet fyne.Resource, w fyne.Window) fyne.CanvasObjec
 		layout.NewSpacer(),      
 		
 		headerRow,               
-		timeSelectionRow,        
+		timeSelectionRow,
+		
+		widget.NewLabel(""),
+		
 		buttonRow,
 		
 		layout.NewSpacer(),      
