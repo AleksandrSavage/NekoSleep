@@ -10,10 +10,10 @@
 *.json
 
 
-/vendor/
 *.test
 *.out
 
+.git
 .DS_Store
 .idea/
 .vscode/

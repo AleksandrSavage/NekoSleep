@@ -6,7 +6,13 @@ import (
 
 func main() {
 	
-	App := ui.NewApp(resourceNunitoRegularTtf, resourceKitteniconIco, resourceKittengreetPng)
+	App := ui.NewApp(
+		resourceNunitoRegularTtf,
+		resourceNunitoBoldTtf,
+		resourceKitteniconIco,
+	 	resourceKittengreetPng,
+		
+	)
 
 	// Запускаем
 	App.Run()

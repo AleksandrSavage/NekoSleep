@@ -12,12 +12,12 @@ type App struct {
 }
 
 // NewApp — конструктор нашего приложения
-func NewApp(font fyne.Resource, icon fyne.Resource, kitten_greet fyne.Resource) *App {
+func NewApp(font fyne.Resource, fontBold fyne.Resource, icon fyne.Resource, kitten_greet fyne.Resource) *App {
 	// 1. Создаем базовое приложение Fyne
 	a := app.New()
 
 	// 2. Устанавливаем кастомную тему (функция NewCustomTheme лежит в theme.go)
-	a.Settings().SetTheme(NewCustomTheme(font, icon))
+	a.Settings().SetTheme(NewCustomTheme(font, fontBold, icon))
 
 	// 3. Создаем главное окно
 	w := a.NewWindow("NekoSleep")
