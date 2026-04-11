@@ -15,7 +15,7 @@ func main() {
 		
 	)
 	// Тестируем локер, передавая ему ту же картинку котенка
-	locker.Show(resourceKittengreetPng)
+	locker.Show(resourceKittenasleepPng)
 	
 	App.Run()
 }
