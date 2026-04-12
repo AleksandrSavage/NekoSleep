@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -11,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"NekoSleep/internal/config"
+	"NekoSleep/internal/monitor"
 )
 
 func buildMainLayout(kitten_greet fyne.Resource, w fyne.Window) fyne.CanvasObject {
@@ -27,7 +29,32 @@ func buildMainLayout(kitten_greet fyne.Resource, w fyne.Window) fyne.CanvasObjec
 		timeText.Alignment = fyne.TextAlignCenter
 		cyclesText.Alignment = fyne.TextAlignCenter
 
+		go func() {
+            ticker := time.NewTicker(2 * time.Second)
+            for range ticker.C {
+                freshData, err := config.Load()
+                
+                if err == nil {
+                    fyne.Do(func() {
+                        timeText.SetText(fmt.Sprintf("Sleep time: %s:%s", freshData.Hour, freshData.Minute))
+                        cyclesText.SetText(fmt.Sprintf("Prolongation left: %s", freshData.Cycles))
+                    })
+                } else {
+                    ticker.Stop()  
+                    monitor.Stop() 
+                    
+                    fyne.Do(func() {
+                        mainWrapper.Objects = []fyne.CanvasObject{makeEditScreen()}
+                        mainWrapper.Refresh()
+                    })
+                    
+                    return 
+                }
+            }
+        }()
+
 		denyBtn := widget.NewButtonWithIcon("deny", theme.CancelIcon(), func() {
+			monitor.Stop()
 			config.Delete()
 			mainWrapper.Objects = []fyne.CanvasObject{makeEditScreen()}
 			mainWrapper.Refresh()
@@ -82,10 +109,11 @@ func buildMainLayout(kitten_greet fyne.Resource, w fyne.Window) fyne.CanvasObjec
 
 			err := config.Save(data)
 			if err == nil {
+				monitor.Start()
 				mainWrapper.Objects = []fyne.CanvasObject{makeSavedScreen(data)}
 				mainWrapper.Refresh()
 			} else {
-				fmt.Println("❌ Ошибка сохранения:", err)
+				fmt.Println("❌ Saving error:", err)
 			}
 		})
 

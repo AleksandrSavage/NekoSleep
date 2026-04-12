@@ -79,19 +79,16 @@ func (b *customButton) MouseOut() {
 // ЛОГИКА ЭКРАНА БЛОКИРОВКИ
 // ==========================
 
-func Show(sleepImg fyne.Resource) {
+func Show(sleepImg fyne.Resource, onProlong func()) {
 	a := fyne.CurrentApp()
 	if a == nil {
 		a = app.New()
 	}
 
-	w := a.NewWindow("NekoSleep - SleepenTime")
+	w := a.NewWindow("NekoSleep - SleepinTime")
 
 	w.SetFullScreen(true)
-
-	w.SetCloseIntercept(func() {
-		fmt.Println("Попытка побега пресечена! Иди спать.")
-	})
+	w.SetCloseIntercept(func() {})
 
 	bgColor := color.RGBA{R: 26, G: 26, B: 46, A: 255}
 	bg := canvas.NewRectangle(bgColor)
@@ -116,22 +113,19 @@ func Show(sleepImg fyne.Resource) {
 	info := widget.NewLabel(fmt.Sprintf("Prolongation left: %d", cyclesLeft))
 
 	var unlockBtn *widget.Button
-	unlockBtn = widget.NewButton("I need a minute...", func() {
-		if cyclesLeft > 0 {
-			cyclesLeft--
-			data.Cycles = strconv.Itoa(cyclesLeft)
+    unlockBtn = widget.NewButton("I need a minute...", func() {
+        if cyclesLeft > 0 {
+            cyclesLeft--
+            data.Cycles = strconv.Itoa(cyclesLeft)
 
-			currentHour, _ := strconv.Atoi(data.Hour)
-			nextHour := (currentHour + 1) % 24
-			data.Hour = fmt.Sprintf("%02d", nextHour)
+            config.Save(data)
 
-			config.Save(data)
+            if onProlong != nil { onProlong()}
 
-			fmt.Printf("🔓 Доступ продлен до %s:%s. Осталось: %d\n", data.Hour, data.Minute, cyclesLeft)
-			w.Close()
-		}
-	})
-
+            fmt.Printf("🔓 can cmputing: %d\n", cyclesLeft)
+            w.Close()  
+        }
+    })
 	if cyclesLeft <= 0 {
 		unlockBtn.Disable()
 		unlockBtn.SetText("Prolongations are over 😿")

@@ -6,14 +6,12 @@
 *.dll
 *.so
 *.dylib
-
 *.json
-
-
 *.test
 *.out
-
+*.config
 .git
+.desktop
 .DS_Store
 .idea/
 .vscode/
