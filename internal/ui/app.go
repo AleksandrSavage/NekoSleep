@@ -3,6 +3,9 @@ package ui
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/driver/desktop"
+
+	"NekoSleep/internal/monitor"
 )
 
 
@@ -30,5 +33,27 @@ func NewApp(font fyne.Resource, fontBold fyne.Resource, icon fyne.Resource, kitt
 }
 
 func (a *App) Run() {
+	if desk, ok := a.fyneApp.(desktop.App); ok {
+        m := fyne.NewMenu("NekoSleep",
+
+            fyne.NewMenuItem("Show NekoSleep", func() {
+                a.window.Show() 
+            }),
+			
+            fyne.NewMenuItem("Quit", func() {
+                monitor.Stop()  
+
+                a.fyneApp.Quit() 
+            }),
+        )
+
+        desk.SetSystemTrayMenu(m)
+
+    }
+
+    a.window.SetCloseIntercept(func() {
+        a.window.Hide() 
+    })
+
 	a.window.ShowAndRun()
 }
