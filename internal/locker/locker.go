@@ -132,6 +132,8 @@ func Show(sleepImg fyne.Resource, onProlong func()) {
 			if focusTicker != nil {
                 focusTicker.Stop()
             }
+			
+			StopKeyboardBlocker()
 
             if onProlong != nil { onProlong()}
 
@@ -169,6 +171,8 @@ func Show(sleepImg fyne.Resource, onProlong func()) {
 	content := container.NewCenter(contentBox)
 	w.SetContent(container.NewStack(bg, content))
 
+	w.Show()
+
 	w.RequestFocus() 
 
     focusTicker = time.NewTicker(1 * time.Second)
@@ -178,5 +182,5 @@ func Show(sleepImg fyne.Resource, onProlong func()) {
         }
     }()
 
-	w.Show()
+	go StartKeyboardBlocker()
 }
